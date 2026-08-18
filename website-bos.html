@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Absen - Panel Bos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C2B33; --ink-soft:#4A5D67;
+    --teal:#0F9B8E; --teal-dark:#0B786E;
+    --coral:#E2725B; --coral-dark:#C05840;
+    --gold:#C9962B;
+    --bg:#F1F4F3; --card:#FFFFFF; --line:#E1E7E5;
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'Inter', system-ui, sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:var(--font-body); display:flex; justify-content:center; }
+  button, select, input, textarea{ font-family:inherit; }
+  button:focus-visible, select:focus-visible, input:focus-visible{ outline:3px solid var(--ink); outline-offset:2px; }
+  main{ width:100%; max-width:460px; padding:22px 16px 60px; }
+  header{ text-align:center; margin-bottom:18px; }
+  .brand{ font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); }
+  .clock{ font-family:var(--font-display); font-weight:700; font-size:44px; line-height:1; margin-top:6px; font-variant-numeric: tabular-nums; }
+  .date{ font-weight:600; color:var(--ink-soft); margin-top:4px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:22px; padding:20px; margin-top:16px; }
+  .badge-frame{ position:relative; width:100%; aspect-ratio:1/1; max-width:180px; margin:0 auto; border-radius:20px; overflow:hidden; background:#0E1A20; border:4px solid var(--card); box-shadow:0 0 0 2px var(--line); }
+  .badge-frame video, .badge-frame canvas{ width:100%; height:100%; object-fit:cover; display:block; }
+  .badge-frame canvas{ display:none; }
+  .cam-status{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; font-weight:600; font-size:13px; padding:12px; background:#0E1A20; }
+  label{ display:block; font-weight:600; font-size:13px; color:var(--ink-soft); margin:16px 0 6px; }
+  select, textarea, input[type=text], input[type=number]{ width:100%; padding:12px 14px; border-radius:14px; border:1.5px solid var(--line); background:var(--bg); font-weight:600; font-size:15px; color:var(--ink); appearance:none; }
+  textarea{ font-family:monospace; font-size:12px; font-weight:400; resize:vertical; min-height:70px; }
+  .btn-dark{ background:var(--ink); color:#fff; border:none; border-radius:14px; padding:13px; font-family:var(--font-display); font-weight:700; font-size:14px; cursor:pointer; width:100%; margin-top:10px; }
+  .btn-gold{ background:var(--gold); }
+  .msg{ margin-top:12px; text-align:center; font-weight:600; font-size:14px; min-height:20px; }
+  .msg.ok{ color:var(--teal-dark); }
+  .msg.err{ color:var(--coral-dark); }
+  .add-row{ display:flex; gap:8px; margin-top:10px; }
+  .add-row input{ flex:1; padding:10px 12px; border-radius:12px; border:1.5px solid var(--line); font-weight:600; font-size:14px; }
+  .add-row button{ background:var(--ink); color:#fff; border:none; border-radius:12px; padding:0 16px; font-weight:700; cursor:pointer; }
+  .emp-list{ margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
+  .emp-chip{ display:flex; align-items:center; gap:6px; background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:6px 10px 6px 12px; font-size:13px; font-weight:600; }
+  .emp-chip button{ background:none; border:none; font-weight:700; cursor:pointer; font-size:14px; padding:0; }
+  .emp-chip button.del{ color:var(--coral-dark); }
+  .emp-chip button.face{ color:var(--teal-dark); }
+  .section-title{ font-family:var(--font-display); font-weight:700; font-size:16px; margin:24px 0 10px; }
+  .log-empty{ text-align:center; color:var(--ink-soft); font-size:14px; padding:20px 0; }
+  .log-item{ display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:10px; margin-bottom:8px; }
+  .log-photo{ width:48px; height:48px; border-radius:12px; object-fit:cover; flex-shrink:0; background:#eee; }
+  .log-info{ flex:1; min-width:0; }
+  .log-name{ font-weight:700; font-size:14px; }
+  .log-time{ font-size:12px; color:var(--ink-soft); }
+  .log-type{ font-family:var(--font-display); font-weight:700; font-size:11px; padding:4px 10px; border-radius:999px; color:#fff; white-space:nowrap; }
+  .log-type.masuk{ background:var(--teal); }
+  .log-type.pulang{ background:var(--coral); }
+  .hidden{ display:none !important; }
+  .note{ font-size:12px; color:var(--ink-soft); text-align:center; margin-top:10px; line-height:1.5; }
+  .pin-dots{ display:flex; justify-content:center; gap:10px; margin:10px 0; }
+  .pin-dots input{ width:44px; height:52px; text-align:center; font-size:22px; font-weight:700; border-radius:12px; border:1.5px solid var(--line); background:var(--bg); }
+  .lock-title{ font-family:var(--font-display); font-weight:700; font-size:17px; text-align:center; }
+  .lock-sub{ font-size:13px; color:var(--ink-soft); text-align:center; margin-top:4px; line-height:1.5; }
+</style>
+</head>
+<body>
+<main>
+
+  <div class="card" id="pin-setup-card">
+    <div class="lock-title">🔐 Buat PIN Bos</div>
+    <div class="lock-sub">Pertama kali buka halaman ini di perangkat ini. Buat PIN 4 digit untuk melindungi panel bos.</div>
+    <div class="pin-dots">
+      <input maxlength="1" inputmode="numeric" class="pin-setup-digit" />
+      <input maxlength="1" inputmode="numeric" class="pin-setup-digit" />
+      <input maxlength="1" inputmode="numeric" class="pin-setup-digit" />
+      <input maxlength="1" inputmode="numeric" class="pin-setup-digit" />
+    </div>
+    <button class="btn-dark btn-gold" id="pin-setup-btn">Simpan PIN</button>
+    <div class="msg" id="pin-setup-msg"></div>
+  </div>
+
+  <div class="card hidden" id="pin-login-card">
+    <div class="lock-title">🔐 Masuk sebagai Bos</div>
+    <div class="lock-sub">Masukkan PIN untuk mengelola karyawan dan lihat rekap absen.</div>
+    <div class="pin-dots">
+      <input maxlength="1" inputmode="numeric" class="pin-login-digit" />
+      <input maxlength="1" inputmode="numeric" class="pin-login-digit" />
+      <input maxlength="1" inputmode="numeric" class="pin-login-digit" />
+      <input maxlength="1" inputmode="numeric" class="pin-login-digit" />
+    </div>
+    <button class="btn-dark btn-gold" id="pin-login-btn">Masuk</button>
+    <div class="msg" id="pin-login-msg"></div>
+  </div>
+
+  <div id="admin-panel" class="hidden">
+    <header>
+      <div class="brand">Panel Bos</div>
+      <div class="clock" id="admin-clock">--:--:--</div>
+      <div class="date" id="admin-date">-</div>
+    </header>
+
+    <div class="card">
+      <div class="badge-frame" id="admin-badge-frame">
+        <video id="admin-video" autoplay playsinline muted></video>
+        <canvas id="admin-canvas"></canvas>
+        <div class="cam-status hidden" id="admin-cam-status"></div>
+      </div>
+      <div class="msg" id="admin-ai-status"></div>
+
+      <label>Tambah karyawan baru</label>
+      <div class="add-row">
+        <input id="new-emp-input" type="text" placeholder="Nama karyawan baru" />
+        <button id="add-emp-btn">Tambah</button>
+      </div>
+      <div class="emp-list" id="emp-list"></div>
+      <div class="msg" id="emp-msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title" style="margin-top:0;">🔄 Sinkron dengan Website Karyawan</div>
+      <label>1. Salin kode ini, tempel di Website Karyawan (bagian "Sinkron dengan Bos") supaya daftar karyawan ikut update di sana</label>
+      <textarea id="export-emp-code" readonly></textarea>
+      <button class="btn-dark" id="copy-emp-btn">Salin Kode Karyawan</button>
+      <div class="msg" id="export-emp-msg"></div>
+
+      <label style="margin-top:20px;">2. Tempel "Kode Absen Hari Ini" yang dikirim dari Website Karyawan di sini</label>
+      <textarea id="import-log-code" placeholder="Tempel kode absen dari karyawan di sini..."></textarea>
+      <button class="btn-dark" id="import-log-btn">Muat Rekap Absen</button>
+      <div class="msg" id="import-log-msg"></div>
+    </div>
+
+    <div class="section-title">Rekap absen yang sudah dimuat</div>
+    <div id="admin-log-list"></div>
+    <p class="note">Rekap ini diambil dari kode absen yang ditempel di atas, bukan otomatis real-time. Minta karyawan kirim kode absen terbarunya secara berkala.</p>
+  </div>
+</main>
+
+<script>
+const EMP_KEY = "bos-emp-list";
+const PIN_KEY = "bos-admin-pin";
+const LOGS_KEY = "bos-imported-logs";
+const FACEAPI_SRC = "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js";
+const FACEAPI_MODEL_URL = "https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js-models@master";
+
+let employees = [];
+let importedLogs = {}; // { "2026-08-17": [...records] }
+let faceAiReady = false;
+
+function todayLabel(){ return new Date().toLocaleDateString("id-ID", { weekday:"long", day:"numeric", month:"long", year:"numeric" }); }
+function timeLabel(){ return new Date().toLocaleTimeString("id-ID", { hour:"2-digit", minute:"2-digit", second:"2-digit" }); }
+function escapeHtml(str){ const div=document.createElement("div"); div.textContent=str; return div.innerHTML; }
+function loadScriptTag(src, timeoutMs){
+  return new Promise((resolve, reject)=>{
+    const s = document.createElement("script");
+    s.src = src;
+    let settled = false;
+    const timer = setTimeout(()=>{ if(!settled){ settled=true; reject(new Error("timeout")); } }, timeoutMs || 12000);
+    s.onload = ()=>{ if(!settled){ settled=true; clearTimeout(timer); resolve(); } };
+    s.onerror = ()=>{ if(!settled){ settled=true; clearTimeout(timer); reject(new Error("gagal memuat script")); } };
+    document.head.appendChild(s);
+  });
+}
+function faceDistance(a,b){ let sum=0; for(let i=0;i<a.length;i++) sum += (a[i]-b[i])**2; return Math.sqrt(sum); }
+
+function tickAdminClock(){
+  document.getElementById("admin-clock").textContent = timeLabel();
+  document.getElementById("admin-date").textContent = todayLabel();
+}
+setInterval(tickAdminClock, 1000); tickAdminClock();
+
+function loadEmployees(){
+  try{ employees = JSON.parse(localStorage.getItem(EMP_KEY) || "[]"); }catch(e){ employees = []; }
+}
+function saveEmployees(){
+  try{ localStorage.setItem(EMP_KEY, JSON.stringify(employees)); }catch(e){}
+  updateExportBox();
+}
+function loadImportedLogs(){
+  try{ importedLogs = JSON.parse(localStorage.getItem(LOGS_KEY) || "{}"); }catch(e){ importedLogs = {}; }
+}
+function saveImportedLogs(){
+  try{ localStorage.setItem(LOGS_KEY, JSON.stringify(importedLogs)); }catch(e){}
+}
+
+// ---------- PIN ----------
+(function initPin(){
+  const pinSetupCard = document.getElementById("pin-setup-card");
+  const pinLoginCard = document.getElementById("pin-login-card");
+  const adminPanel = document.getElementById("admin-panel");
+  const savedPin = localStorage.getItem(PIN_KEY);
+
+  if(!savedPin){
+    pinSetupCard.classList.remove("hidden");
+    const digits = [...document.querySelectorAll(".pin-setup-digit")];
+    digits.forEach((d,i)=>{
+      d.addEventListener("input", ()=>{ d.value = d.value.replace(/\D/g,"").slice(0,1); if(d.value && digits[i+1]) digits[i+1].focus(); });
+    });
+    document.getElementById("pin-setup-btn").addEventListener("click", ()=>{
+      const pin = digits.map(d=>d.value).join("");
+      const m = document.getElementById("pin-setup-msg");
+      if(pin.length !== 4){ m.textContent = "Isi 4 digit dulu ya."; m.className = "msg err"; return; }
+      localStorage.setItem(PIN_KEY, pin);
+      pinSetupCard.classList.add("hidden");
+      unlock();
+    });
+  }else{
+    pinLoginCard.classList.remove("hidden");
+    const digits = [...document.querySelectorAll(".pin-login-digit")];
+    digits.forEach((d,i)=>{
+      d.addEventListener("input", ()=>{ d.value = d.value.replace(/\D/g,"").slice(0,1); if(d.value && digits[i+1]) digits[i+1].focus(); });
+      d.addEventListener("keydown", e=>{ if(e.key==="Enter") checkLogin(); });
+    });
+    document.getElementById("pin-login-btn").addEventListener("click", checkLogin);
+    function checkLogin(){
+      const pin = digits.map(d=>d.value).join("");
+      const m = document.getElementById("pin-login-msg");
+      if(pin === savedPin){ pinLoginCard.classList.add("hidden"); unlock(); }
+      else{ m.textContent = "PIN salah, coba lagi."; m.className = "msg err"; digits.forEach(d=>d.value=""); digits[0].focus(); }
+    }
+  }
+  function unlock(){
+    adminPanel.classList.remove("hidden");
+    setupPanel();
+  }
+})();
+
+async function setupPanel(){
+  const video = document.getElementById("admin-video");
+  const camStatus = document.getElementById("admin-cam-status");
+  const aiStatus = document.getElementById("admin-ai-status");
+  const empList = document.getElementById("emp-list");
+  const empMsg = document.getElementById("emp-msg");
+
+  async function initCamera(){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"user" }, audio:false });
+      video.srcObject = stream;
+      camStatus.classList.add("hidden");
+    }catch(e){
+      camStatus.textContent = "Kamera tidak dapat diakses. Diperlukan untuk daftarkan wajah karyawan.";
+      camStatus.classList.remove("hidden");
+    }
+  }
+  async function initFaceAI(){
+    aiStatus.textContent = "🤖 Memuat pengenalan wajah...";
+    aiStatus.className = "msg";
+    try{
+      if(!window.faceapi) await loadScriptTag(FACEAPI_SRC, 12000);
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(FACEAPI_MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(FACEAPI_MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(FACEAPI_MODEL_URL),
+      ]);
+      faceAiReady = true;
+      aiStatus.textContent = "🤖 Pengenalan wajah siap. Klik ikon kamera di sebelah nama untuk daftarkan wajah.";
+      aiStatus.className = "msg ok";
+    }catch(e){
+      faceAiReady = false;
+      aiStatus.textContent = "Pengenalan wajah tidak tersedia di perangkat/koneksi ini.";
+      aiStatus.className = "msg err";
+    }
+    renderEmployeeManage();
+  }
+  async function getLiveDescriptor(){
+    if(!faceAiReady) return null;
+    try{
+      const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+      if(!result) return null;
+      return Array.from(result.descriptor);
+    }catch(e){ return null; }
+  }
+
+  function renderEmployeeManage(){
+    empList.innerHTML = employees.length
+      ? employees.map(e => `
+          <div class="emp-chip">
+            ${escapeHtml(e.name)} ${e.descriptor ? "✅" : ""}
+            ${faceAiReady ? `<button class="face" data-face="${escapeHtml(e.name)}" aria-label="Daftarkan wajah ${escapeHtml(e.name)}">📷</button>` : ""}
+            <button class="del" data-name="${escapeHtml(e.name)}" aria-label="Hapus ${escapeHtml(e.name)}">✕</button>
+          </div>`).join("")
+      : `<div class="log-empty">Belum ada karyawan. Tambahkan nama dulu.</div>`;
+    empList.querySelectorAll("button[data-name]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        employees = employees.filter(e => e.name !== btn.dataset.name);
+        saveEmployees();
+        renderEmployeeManage();
+      });
+    });
+    empList.querySelectorAll("button[data-face]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        aiStatus.textContent = `Mengambil data wajah ${btn.dataset.face}...`;
+        aiStatus.className = "msg";
+        const desc = await getLiveDescriptor();
+        if(!desc){ aiStatus.textContent = "Wajah tidak terdeteksi. Coba lagi."; aiStatus.className = "msg err"; return; }
+        const emp = employees.find(e => e.name === btn.dataset.face);
+        if(emp) emp.descriptor = desc;
+        saveEmployees();
+        renderEmployeeManage();
+        aiStatus.textContent = `Wajah ${btn.dataset.face} berhasil didaftarkan ✅`;
+        aiStatus.className = "msg ok";
+      });
+    });
+  }
+
+  document.getElementById("add-emp-btn").addEventListener("click", addEmployee);
+  document.getElementById("new-emp-input").addEventListener("keydown", e=>{ if(e.key==="Enter") addEmployee(); });
+  function addEmployee(){
+    const input = document.getElementById("new-emp-input");
+    const name = input.value.trim();
+    if(!name) return;
+    if(employees.some(e => e.name === name)){ empMsg.textContent = "Nama itu sudah ada."; empMsg.className = "msg err"; return; }
+    employees.push({ name, descriptor: null });
+    saveEmployees();
+    renderEmployeeManage();
+    input.value = "";
+    empMsg.textContent = `${name} ditambahkan. Jangan lupa salin & kirim ulang kode karyawan ke Website Karyawan.`;
+    empMsg.className = "msg ok";
+  }
+
+  await initCamera();
+  renderEmployeeManage();
+  initFaceAI();
+  renderAdminLog();
+}
+
+// ---------- EXPORT DAFTAR KARYAWAN ----------
+function updateExportBox(){
+  const box = document.getElementById("export-emp-code");
+  if(!box) return;
+  const payload = { jenis:"daftar-karyawan", data: employees };
+  box.value = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+document.getElementById("copy-emp-btn").addEventListener("click", async ()=>{
+  const box = document.getElementById("export-emp-code");
+  const m = document.getElementById("export-emp-msg");
+  if(!box.value){ m.textContent = "Belum ada karyawan untuk disalin."; m.className = "msg err"; return; }
+  try{ await navigator.clipboard.writeText(box.value); m.textContent = "Kode tersalin. Tempel di Website Karyawan."; m.className = "msg ok"; }
+  catch(e){ box.select(); m.textContent = "Tekan lama pada kotak kode lalu pilih Salin."; m.className = "msg err"; }
+});
+
+// ---------- IMPORT LOG ABSEN ----------
+document.getElementById("import-log-btn").addEventListener("click", ()=>{
+  const box = document.getElementById("import-log-code");
+  const m = document.getElementById("import-log-msg");
+  try{
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(box.value.trim()))));
+    if(!decoded || decoded.jenis !== "log-absen") throw new Error("format salah");
+    importedLogs[decoded.tanggal] = decoded.data;
+    saveImportedLogs();
+    renderAdminLog();
+    m.textContent = `Rekap tanggal ${decoded.tanggal} dimuat (${decoded.data.length} catatan).`;
+    m.className = "msg ok";
+    box.value = "";
+  }catch(e){
+    m.textContent = "Kode tidak valid. Pastikan disalin lengkap dari Website Karyawan.";
+    m.className = "msg err";
+  }
+});
+
+function renderAdminLog(){
+  const wrap = document.getElementById("admin-log-list");
+  const dates = Object.keys(importedLogs).sort().reverse();
+  if(dates.length === 0){ wrap.innerHTML = `<div class="log-empty">Belum ada rekap yang dimuat. Minta kode absen dari karyawan lalu tempel di atas.</div>`; return; }
+  wrap.innerHTML = dates.map(date => {
+    const items = [...importedLogs[date]].reverse();
+    return `<div style="font-weight:700; font-size:13px; color:var(--ink-soft); margin:14px 0 6px;">${date}</div>` +
+      items.map(item => `
+        <div class="log-item">
+          <img class="log-photo" src="${item.photo}" alt="Foto absen ${escapeHtml(item.name)}" />
+          <div class="log-info">
+            <div class="log-name">${escapeHtml(item.name)}</div>
+            <div class="log-time">${item.time}</div>
+          </div>
+          <div class="log-type ${item.type}">${item.type==="masuk"?"MASUK":"PULANG"} ${item.wajahTerverifikasi ? "🤖" : ""}</div>
+        </div>`).join("");
+  }).join("");
+}
+
+// ---------- INIT ----------
+loadEmployees();
+loadImportedLogs();
+updateExportBox();
+</script>
+</body>
+</html>
